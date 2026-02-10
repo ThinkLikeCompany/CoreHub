@@ -20,19 +20,25 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-          version: 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'pnpm'
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
 
+      - name: Cache bundles outbut
+        uses: actions/cache@v3
+        id: cache-bundle
+        with:
+          path: dist
+          key: ${{ runner.os }}-build-${{ github.sha }}
+      
       - name: Build project
+        if: ${{steps.cache-bundle.outputs.cache-hit != 'true'}}
         run: pnpm build
 
       - name: Deploy to Cloudflare
